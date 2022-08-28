@@ -71,6 +71,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>leaf-server</finalName>
 	</build>
 
 </project>
