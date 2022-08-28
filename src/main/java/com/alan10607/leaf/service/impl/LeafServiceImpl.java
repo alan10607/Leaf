@@ -54,6 +54,9 @@ public class LeafServiceImpl implements LeafService {
         if(Strings.isBlank(leafDTO.getLeafName()))
             throw new IllegalStateException("LeafName can't be blank");
 
+        if(leafCountDAO.findByLeafName(leafDTO.getLeafName()).isPresent())
+            throw new IllegalStateException("LeafName already exist");
+
         LeafCount leafCount = new LeafCount(leafDTO.getLeafName(), 0L, 0L, timeUtil.now());
         leafCountDAO.save(leafCount);
     }
