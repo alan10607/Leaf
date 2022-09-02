@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org">
+<head>
+    <title>LEAF</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1">
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="icon.png">
+    <link rel="stylesheet" th:href="@{css/leaf.css}">
+    <script type="text/JavaScript" th:src="@{js/leaf.js}"></script>
+    <script type="text/JavaScript" th:src="@{js/jquery-3.6.1.min.js}"></script>
+</head>
+<script th:inline="javascript">//啟用thymeleaf 內聯
+    const BASE_URL = /*[[${baseUrl}]]*/ "";
+    const LEAF_NAME = /*[[${leafName}]]*/ "";
+</script>
+<body onload="init();">
+<h1>Welcome to my HOUSE</h1>
+
+<div id="bg" class="full-screan center">
+    <div>
+        <img class="leaf-img" th:src="@{pic/leaf.jpg}">
+    </div>
+    <div id="you-info-box">
+        You POP <span id="you-pop">0</span> times!!
+    </div>
+</div>
+
+<div id="top" class="full-screan center">
+    <div>
+        <div class="flex-box">
+            <div class="flex-item center" onclick="vote(2);">
+                <div>
+                    <div class="icon">X</div>
+                    <br>
+                    <div id="bad" class="count" >0</div>
+                </div>
+            </div>
+            <div class="flex-item center" onclick="vote(1);">
+                <div>
+                    <div class="icon">V</div>
+                    <br>
+                    <div id="good" class="count" >0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

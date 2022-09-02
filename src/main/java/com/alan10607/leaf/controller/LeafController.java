@@ -24,7 +24,7 @@ public class LeafController {
             leafDTO = leafService.getCount(leafName);
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
-            log.error(e.toString());
+            log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }
@@ -35,7 +35,7 @@ public class LeafController {
             leafService.vote(leafDTO);
             return responseUtil.ok();
         }catch (Exception e){
-            log.error("", e.toString());
+            log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }
@@ -46,7 +46,7 @@ public class LeafController {
             leafService.create(leafDTO);
             return responseUtil.ok();
         }catch (Exception e){
-            log.error("", e.toString());
+            log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }
