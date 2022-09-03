@@ -26,7 +26,7 @@ public class ViewController {
     public String index(@RequestParam(value = "leafName", required = false) String leafName, Model model){
         try{
             if(leafName == null) leafName = "leaf";//!!!暫時給個預設 還沒想好怎麼給明子
-//            LeafDTO leafDTO = viewService.findCountFromRedis(leafName);
+            LeafDTO leafDTO = viewService.findCountFromRedis(leafName);
 
             model.addAttribute("leafName", "leaf");
             model.addAttribute("baseUrl", "/view");
@@ -52,8 +52,7 @@ public class ViewController {
     @PostMapping("/view/getCount")
     public ResponseEntity getCount(@RequestBody LeafDTO leafDTO){
         try{
-           // leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
-            if(1==1) throw new RuntimeException("ss");
+            leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());

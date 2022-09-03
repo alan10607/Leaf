@@ -27,8 +27,8 @@ public class LeafServiceImpl implements LeafService {
 
         LeafDTO leafDTO = new LeafDTO();
         leafDTO.setLeafName(leafCount.getLeafName());
-        leafDTO.setChoice1(leafCount.getChoice1());
-        leafDTO.setChoice2(leafCount.getChoice2());
+        leafDTO.setGood(leafCount.getChoice1());
+        leafDTO.setBad(leafCount.getChoice2());
         return leafDTO;
     }
 
@@ -40,8 +40,8 @@ public class LeafServiceImpl implements LeafService {
         LeafCount leafCount = leafCountDAO.findByLeafName(leafDTO.getLeafName())
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
-        leafCount.setChoice1(leafCount.getChoice1() + leafDTO.getChoice1());
-        leafCount.setChoice2(leafCount.getChoice2() + leafDTO.getChoice2());
+        leafCount.setChoice1(leafCount.getChoice1() + leafDTO.getGood());
+        leafCount.setChoice2(leafCount.getChoice2() + leafDTO.getBad());
         leafCount.setUpdatedDate(timeUtil.now());
         leafCountDAO.save(leafCount);
     }

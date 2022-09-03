@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 @NoArgsConstructor
-public class LeafDTO {
-    private String leafName;
+public class ViewDTO {
     private Long good;
     private Long bad;
 }

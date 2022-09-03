@@ -6,7 +6,7 @@ function post(url, data, afterFunc){
 		headers:{'Content-Type':'application/json;charset=utf8'},
 		dataType: "json",
 		success: function (res, status) {
-			afterFunc(res);
+			afterFunc(res.result);
 			console.log("Status:" + status + ",res:" + JSON.stringify(res));
 		},
 		error: function (xhr, status) {
@@ -43,6 +43,7 @@ function updateCount() {
 }
 
 //更新頁面後處理
-function updateCountAfter(){
-
+function updateCountAfter(leafDTO){
+    $("#good").text(leafDTO.good);
+    $("#bad").text(leafDTO.bad);
 }

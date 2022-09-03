@@ -1,18 +1,60 @@
 package com.alan10607.leaf.service.impl;
 
+import com.alan10607.leaf.dto.LeafDTO;
 import com.alan10607.leaf.service.ViewService;
+import com.alan10607.leaf.util.RedisKeyUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class ViewServiceImpl implements ViewService {
-/*
     private final RedisTemplate redisTemplate;
     private final RedissonClient redisson;
-    private final RedisKeyUtil keyUtil;
+    private final RedisKeyUtil redisKeyUtil;
+
+    public LeafDTO findCountFromRedis(String leafName) {
+        if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
+
+        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+        LeafDTO leafDTO = new LeafDTO();
+        try {
+            lock.readLock().lock();
+
+            String hashKey = redisKeyUtil.getLeafKey(leafName);
+            Map<String, Object> map = redisTemplate.opsForHash().entries(hashKey);
+            if(map.isEmpty()){
+                // findCountFromDB(leafName);//重新去DB抓
+                return null;
+            }else{
+                leafDTO.setGood(toLong(map.get("good")));//超過2^31-1時會是Long, 否則會是Integer
+                leafDTO.setBad(toLong(map.get("bad")));
+                log.info("[REDIS] findCountFromRedis by " + Thread.currentThread().getName());
+            }
+        }catch (Exception e){
+            log.error("", e);
+        }finally {
+            lock.readLock().unlock();
+        }
+        return leafDTO;
+    }
+
+    public long toLong(Object integerOrLong){
+        return integerOrLong instanceof Integer ? (Integer) integerOrLong : (Long) integerOrLong;
+    }
+
+/*
+
+
+
 
     private final LeafService leafService;
 
