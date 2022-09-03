@@ -2,7 +2,7 @@ package com.alan10607.leaf.service.impl;
 
 import com.alan10607.leaf.dao.LeafCountDAO;
 import com.alan10607.leaf.dto.LeafDTO;
-import com.alan10607.leaf.model.LeafCount;
+import com.alan10607.leaf.model.Leaf;
 import com.alan10607.leaf.service.LeafService;
 import com.alan10607.leaf.util.TimeUtil;
 import lombok.AllArgsConstructor;
@@ -22,13 +22,13 @@ public class LeafServiceImpl implements LeafService {
      * @return
      */
     public LeafDTO getCount(String leafName) {
-        LeafCount leafCount = leafCountDAO.findByLeafName(leafName)
+        Leaf leaf = leafCountDAO.findByLeafName(leafName)
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
         LeafDTO leafDTO = new LeafDTO();
-        leafDTO.setLeafName(leafCount.getLeafName());
-        leafDTO.setGood(leafCount.getChoice1());
-        leafDTO.setBad(leafCount.getChoice2());
+        leafDTO.setLeafName(leaf.getLeafName());
+        leafDTO.setGood(leaf.getGood());
+        leafDTO.setBad(leaf.getBad());
         return leafDTO;
     }
 
@@ -37,13 +37,13 @@ public class LeafServiceImpl implements LeafService {
      * @param leafDTO
      */
     public void vote(LeafDTO leafDTO) {
-        LeafCount leafCount = leafCountDAO.findByLeafName(leafDTO.getLeafName())
+        Leaf leaf = leafCountDAO.findByLeafName(leafDTO.getLeafName())
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
-        leafCount.setChoice1(leafCount.getChoice1() + leafDTO.getGood());
-        leafCount.setChoice2(leafCount.getChoice2() + leafDTO.getBad());
-        leafCount.setUpdatedDate(timeUtil.now());
-        leafCountDAO.save(leafCount);
+        leaf.setGood(leaf.getGood() + leafDTO.getGood());
+        leaf.setBad(leaf.getBad() + leafDTO.getBad());
+        leaf.setUpdatedDate(timeUtil.now());
+        leafCountDAO.save(leaf);
     }
 
     /**
@@ -57,8 +57,8 @@ public class LeafServiceImpl implements LeafService {
         if(leafCountDAO.findByLeafName(leafDTO.getLeafName()).isPresent())
             throw new IllegalStateException("LeafName already exist");
 
-        LeafCount leafCount = new LeafCount(leafDTO.getLeafName(), 0L, 0L, timeUtil.now());
-        leafCountDAO.save(leafCount);
+        Leaf leaf = new Leaf(leafDTO.getLeafName(), 0L, 0L, timeUtil.now());
+        leafCountDAO.save(leaf);
     }
 
 }

@@ -13,7 +13,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LeafCount {
+public class Leaf {
 
     @Id
     @GeneratedValue(strategy = AUTO)
@@ -22,17 +22,17 @@ public class LeafCount {
     @Column(nullable = false)
     private String leafName;
 
-    private Long choice1;
-    private Long choice2;
+    private Long good;
+    private Long bad;
     private LocalDateTime updatedDate;
 
-    public LeafCount(String leafName,
-                     Long choice1,
-                     Long choice2,
+    public Leaf(String leafName,
+                     Long good,
+                     Long bad,
                      LocalDateTime updatedDate) {
         this.leafName = leafName;
-        this.choice1 = choice1;
-        this.choice2 = choice2;
+        this.good = good;
+        this.bad = bad;
         this.updatedDate = updatedDate;
     }
 

@@ -1,5 +1,6 @@
 package com.alan10607.leaf.service.impl;
 
+import com.alan10607.leaf.constant.CountType;
 import com.alan10607.leaf.dto.LeafDTO;
 import com.alan10607.leaf.service.ViewService;
 import com.alan10607.leaf.util.RedisKeyUtil;
@@ -30,14 +31,14 @@ public class ViewServiceImpl implements ViewService {
             lock.readLock().lock();
 
             String hashKey = redisKeyUtil.getLeafKey(leafName);
-            Map<String, Object> map = redisTemplate.opsForHash().entries(hashKey);
+            Map<String, Number> map = redisTemplate.opsForHash().entries(hashKey);
             if(map.isEmpty()){
                 // findCountFromDB(leafName);//重新去DB抓
                 return null;
             }else{
-                leafDTO.setGood(toLong(map.get("good")));//超過2^31-1時會是Long, 否則會是Integer
-                leafDTO.setBad(toLong(map.get("bad")));
-                log.info("[REDIS] findCountFromRedis by " + Thread.currentThread().getName());
+                leafDTO.setGood(map.get("good").longValue());//超過2^31-1時會是Long, 否則會是Integer
+                leafDTO.setBad(map.get("bad").longValue());
+                log.info("[REDIS] findCountFromRedis " + map);
             }
         }catch (Exception e){
             log.error("", e);
@@ -47,9 +48,30 @@ public class ViewServiceImpl implements ViewService {
         return leafDTO;
     }
 
-    public long toLong(Object integerOrLong){
-        return integerOrLong instanceof Integer ? (Integer) integerOrLong : (Long) integerOrLong;
+    public long countIncr(String leafName, int voteFor) {
+        if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
+        String field = getCountType(voteFor);
+        if(field.isEmpty()) throw new IllegalStateException("VoteFor is not defined");
+
+        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+        long res = -1L;
+        try {
+            lock.writeLock().lock();
+            String hashKey = redisKeyUtil.getLeafKey(leafName);
+            if(!redisTemplate.hasKey(hashKey)){}
+                //findCountFromDB(hashKey);
+
+            res = redisTemplate.opsForHash().increment(hashKey, field, 1);
+
+            log.info("[REDIS] countIncr " + field + ":" + res);
+        }catch (Exception e){
+            log.error("", e);
+        }finally {
+            lock.writeLock().unlock();
+        }
+        return res;
     }
+
 
 /*
 
@@ -107,29 +129,6 @@ public class ViewServiceImpl implements ViewService {
         return leafDTO;
     }
 
-    public long countIncr(String leafName, int voteFor) {
-        if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
-        String field = getCountType(voteFor);
-        if(field.isEmpty()) throw new IllegalStateException("VoteFor is not defined");
-
-        RReadWriteLock lock = redisson.getReadWriteLock(RedisKeyUtil.lock(leafName));
-        long res = -1L;
-        try {
-            lock.writeLock().lock();
-            String hashKey = keyUtil.getLeafKey(leafName);
-            if(!redisTemplate.hasKey(hashKey))
-                findCountFromDB(hashKey);
-
-            redisTemplate.opsForHash().increment(hashKey, field, 1);
-
-            System.out.println("REDIS called countIncr " + Thread.currentThread().getName());
-        }catch (Exception e){
-            log.error("", e);
-        }finally {
-            lock.writeLock().unlock();
-        }
-        return res;
-    }
 
 
     public void saveCountToDB() {
@@ -175,6 +174,9 @@ public class ViewServiceImpl implements ViewService {
         }
     }
 
+
+*/
+
     private String getCountType(int voteFor) {
         for (CountType type : CountType.values()) {
             if(type.getVoteFor() == voteFor)
@@ -182,6 +184,5 @@ public class ViewServiceImpl implements ViewService {
         }
         return "";
     }
-*/
 
 }

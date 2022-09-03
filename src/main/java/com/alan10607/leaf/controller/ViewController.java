@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Random;
+
 @Controller
 @RequestMapping(path = "/")
 @AllArgsConstructor
@@ -53,6 +55,23 @@ public class ViewController {
     public ResponseEntity getCount(@RequestBody LeafDTO leafDTO){
         try{
             leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
+            return responseUtil.ok(leafDTO);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return responseUtil.err(e);
+        }
+    }
+
+    @PostMapping("/view/test")
+    public ResponseEntity test(@RequestBody LeafDTO leafDTO){
+        try{
+            int r = (int) (Math.random() * 10);
+            if(r <=1 ){
+                viewService.countIncr(leafDTO.getLeafName(), r);
+            }else{
+
+                leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
+            }
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());

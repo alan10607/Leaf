@@ -1,14 +1,14 @@
 package com.alan10607.leaf.dao;
 
-import com.alan10607.leaf.model.LeafCount;
+import com.alan10607.leaf.model.Leaf;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface LeafCountDAO extends JpaRepository<LeafCount, Long> {
-    Optional<LeafCount> findByLeafName(String leafName);
+public interface LeafCountDAO extends JpaRepository<Leaf, Long> {
+    Optional<Leaf> findByLeafName(String leafName);
 
     /*
     @Transactional
