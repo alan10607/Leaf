@@ -40,5 +40,10 @@ public class RedisKeyUtil {
         return "schedule-queue";
     }
 
+
+    public int getExpireTime(int sec){
+        return ((int) (Math.random() * 60)) + sec;//加上60秒
+    }
+
 }
 

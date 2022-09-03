@@ -17,11 +17,10 @@ public class LeafController {
     private final LeafService leafService;
     private final ResponseUtil responseUtil;
 
-    @GetMapping("/getCount")
-    public ResponseEntity getCount(@RequestParam String leafName){
-        LeafDTO leafDTO;
+    @PostMapping("/findCount")
+    public ResponseEntity findCount(@RequestBody LeafDTO leafDTO){
         try{
-            leafDTO = leafService.getCount(leafName);
+            leafDTO = leafService.findCount(leafDTO.getLeafName());
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());
@@ -29,10 +28,10 @@ public class LeafController {
         }
     }
 
-    @PostMapping("/vote")
-    public ResponseEntity vote(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/updateCount")
+    public ResponseEntity updateCount(@RequestBody LeafDTO leafDTO){
         try{
-            leafService.vote(leafDTO);
+            leafService.updateCount(leafDTO);
             return responseUtil.ok();
         }catch (Exception e){
             log.error(e.getMessage());

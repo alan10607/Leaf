@@ -21,7 +21,7 @@ public class LeafServiceImpl implements LeafService {
      * @param leafName
      * @return
      */
-    public LeafDTO getCount(String leafName) {
+    public LeafDTO findCount(String leafName) {
         Leaf leaf = leafCountDAO.findByLeafName(leafName)
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
@@ -36,7 +36,10 @@ public class LeafServiceImpl implements LeafService {
      * Update leaf count
      * @param leafDTO
      */
-    public void vote(LeafDTO leafDTO) {
+    public void updateCount(LeafDTO leafDTO) {
+        if(Strings.isBlank(leafDTO.getLeafName()) || leafDTO.getGood() == null || leafDTO.getBad() == null)
+            throw new IllegalStateException("Required parameter miss");
+
         Leaf leaf = leafCountDAO.findByLeafName(leafDTO.getLeafName())
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 

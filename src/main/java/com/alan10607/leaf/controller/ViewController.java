@@ -66,12 +66,23 @@ public class ViewController {
     public ResponseEntity test(@RequestBody LeafDTO leafDTO){
         try{
             int r = (int) (Math.random() * 10);
-            if(r <=1 ){
+            if(r <= 1){
                 viewService.countIncr(leafDTO.getLeafName(), r);
             }else{
-
                 leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
             }
+            return responseUtil.ok(leafDTO);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return responseUtil.err(e);
+        }
+    }
+    @PostMapping("/view/test2")
+    public ResponseEntity test2(@RequestBody LeafDTO leafDTO){
+        try{
+
+            viewService.findCountFromDB(leafDTO.getLeafName());
+
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());
