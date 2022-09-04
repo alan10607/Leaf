@@ -23,7 +23,7 @@ public class QuartzConfig {
      */
     @Bean
     public Trigger redisTrigger(){
-        ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/30 * * * * ?"); //每30秒執行一次
+        ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0 0/15 * * * ?"); //每15分鐘執行一次
         return TriggerBuilder.newTrigger().forJob(redisJobDetail()).withSchedule(scheduleBuilder).build();
     }
 

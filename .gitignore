@@ -38,6 +38,7 @@ build/
 
 ### My setting ###
 log/
+*.log
 out/
 .DS_Store
 _test*

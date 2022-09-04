@@ -30,7 +30,7 @@ public class ViewServiceImpl implements ViewService {
     private final RedisKeyUtil redisKeyUtil;
     private final LeafDAO leafDAO;
     private final TimeUtil timeUtil;
-    private final static int EXPIRE_TIME = 3600;
+    private final static int EXPIRE_TIME = 3600;//leaf hash過期時間
 
     /**
      * 從Redis查詢count, 若不存在則去DB查
