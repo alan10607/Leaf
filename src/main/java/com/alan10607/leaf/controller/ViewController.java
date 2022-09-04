@@ -81,7 +81,8 @@ public class ViewController {
     public ResponseEntity test2(@RequestBody LeafDTO leafDTO){
         try{
             //viewService.findCountFromRedis(leafDTO);
-            viewService.countIncr(leafDTO);
+            //viewService.countIncr(leafDTO);
+            viewService.saveCountToDB();
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());

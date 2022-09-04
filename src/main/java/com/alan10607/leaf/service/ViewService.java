@@ -6,6 +6,5 @@ public interface ViewService {
     LeafDTO findCountFromRedis(LeafDTO leafDTO) throws Exception;
     void countIncr(LeafDTO leafDTO) throws Exception;
     boolean findCountFromDB(String leafName) throws Exception;
-
-//    void saveCountToDB();
+    boolean saveCountToDB() throws Exception;
 }

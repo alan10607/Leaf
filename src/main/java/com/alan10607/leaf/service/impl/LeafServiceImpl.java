@@ -1,6 +1,6 @@
 package com.alan10607.leaf.service.impl;
 
-import com.alan10607.leaf.dao.LeafCountDAO;
+import com.alan10607.leaf.dao.LeafDAO;
 import com.alan10607.leaf.dto.LeafDTO;
 import com.alan10607.leaf.model.Leaf;
 import com.alan10607.leaf.service.LeafService;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class LeafServiceImpl implements LeafService {
 
-    private final LeafCountDAO leafCountDAO;
+    private final LeafDAO leafDAO;
     private final TimeUtil timeUtil;
 
     /**
@@ -22,7 +22,7 @@ public class LeafServiceImpl implements LeafService {
      * @return
      */
     public LeafDTO findCount(String leafName) {
-        Leaf leaf = leafCountDAO.findByLeafName(leafName)
+        Leaf leaf = leafDAO.findByLeafName(leafName)
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
         LeafDTO leafDTO = new LeafDTO();
@@ -40,13 +40,13 @@ public class LeafServiceImpl implements LeafService {
         if(Strings.isBlank(leafDTO.getLeafName()) || leafDTO.getGood() == null || leafDTO.getBad() == null)
             throw new IllegalStateException("Required parameter miss");
 
-        Leaf leaf = leafCountDAO.findByLeafName(leafDTO.getLeafName())
+        Leaf leaf = leafDAO.findByLeafName(leafDTO.getLeafName())
                 .orElseThrow(() -> new IllegalStateException("LeafName Not Found"));
 
         leaf.setGood(leaf.getGood() + leafDTO.getGood());
         leaf.setBad(leaf.getBad() + leafDTO.getBad());
         leaf.setUpdatedDate(timeUtil.now());
-        leafCountDAO.save(leaf);
+        leafDAO.save(leaf);
     }
 
     /**
@@ -57,11 +57,11 @@ public class LeafServiceImpl implements LeafService {
         if(Strings.isBlank(leafDTO.getLeafName()))
             throw new IllegalStateException("LeafName can't be blank");
 
-        if(leafCountDAO.findByLeafName(leafDTO.getLeafName()).isPresent())
+        if(leafDAO.findByLeafName(leafDTO.getLeafName()).isPresent())
             throw new IllegalStateException("LeafName already exist");
 
         Leaf leaf = new Leaf(leafDTO.getLeafName(), 0L, 0L, timeUtil.now());
-        leafCountDAO.save(leaf);
+        leafDAO.save(leaf);
     }
 
 }

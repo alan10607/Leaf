@@ -1,18 +1,16 @@
 package com.alan10607.leaf.config;
 
-import com.alan10607.leaf.dto.ViewDTO;
-import io.lettuce.core.dynamic.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@Slf4j
 @EnableRedisRepositories
 public class RedisConfig {
 
@@ -24,43 +22,11 @@ public class RedisConfig {
 //        return new LettuceConnectionFactory(conf);
 //    }
 
-
-//
-//    public RedisConfig(
-//            @Value("${redis.hostname}") String hostname,
-//            @Value("${redis.port}") int port,
-//            @Value("${redis.database}") int database,
-//            @Value("${redis.password}") String password,
-//            @Value("${redis.timeout}") long timeout
-//    ) {
-//
-//        this.HOSTNAME = hostname;
-//        this.PORT = port;
-//        this.DATABASE = database;
-//        this.PASSWORD = password;
-//        this.TIMEOUT = timeout;
-//    }
-//
-//    @Bean
-//    public RedisConnectionFactory redisConnectionFactory() {
-//        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-//        config.setHostName(HOSTNAME);
-//        config.setPort(PORT);
-//        config.setDatabase(DATABASE);
-//        config.setPassword(PASSWORD);
-//
-//        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-//                .commandTimeout(Duration.ofMillis(TIMEOUT))
-//                .build();
-//
-//        return new LettuceConnectionFactory(config, clientConfig);
-//    }
-
     @Bean
     public RedisTemplate<String, Long> redisTemplate(LettuceConnectionFactory connectionFactory){
         RedisTemplate<String, Long> template = new RedisTemplate<>();
 
-        //設定連線工廠 改由application控制
+        //設定連線工廠, LettuceConnectionFactory設定在application.properties
         template.setConnectionFactory(connectionFactory);
 
         /*
@@ -72,8 +38,6 @@ public class RedisConfig {
         //設定序列化方式
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
-//        template.setHashKeySerializer(new Jackson2JsonRedisSerializer(Long.class));
-//        template.setHashValueSerializer(new Jackson2JsonRedisSerializer(Long.class));
         template.setHashKeySerializer(new GenericJackson2JsonRedisSerializer());
         template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 
@@ -82,8 +46,8 @@ public class RedisConfig {
 
         //設定這些參數
         template.afterPropertiesSet();
+        log.info("RedisTemplate config succeeded");
         return template;
     }
-
 
 }

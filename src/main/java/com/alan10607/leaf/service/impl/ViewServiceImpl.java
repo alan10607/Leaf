@@ -1,12 +1,12 @@
 package com.alan10607.leaf.service.impl;
 
 import com.alan10607.leaf.constant.CountType;
-import com.alan10607.leaf.dao.LeafCountDAO;
+import com.alan10607.leaf.dao.LeafDAO;
 import com.alan10607.leaf.dto.LeafDTO;
 import com.alan10607.leaf.model.Leaf;
-import com.alan10607.leaf.service.LeafService;
 import com.alan10607.leaf.service.ViewService;
 import com.alan10607.leaf.util.RedisKeyUtil;
+import com.alan10607.leaf.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -16,10 +16,10 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,20 +28,25 @@ public class ViewServiceImpl implements ViewService {
     private final RedisTemplate redisTemplate;
     private final RedissonClient redisson;
     private final RedisKeyUtil redisKeyUtil;
-    private final LeafService leafService;
-    private final LeafCountDAO leafCountDAO;
-    private final static int EXPIRE_TIME = 60;
+    private final LeafDAO leafDAO;
+    private final TimeUtil timeUtil;
+    private final static int EXPIRE_TIME = 3600;
 
-
+    /**
+     * 從Redis查詢count, 若不存在則去DB查
+     * @param leafDTO
+     * @return
+     * @throws Exception
+     */
     public LeafDTO findCountFromRedis(LeafDTO leafDTO) throws Exception {
         String leafName = leafDTO.getLeafName();
         if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
 
         //先檢查是否存在redis
-        String hashKey = redisKeyUtil.getLeafKey(leafName);
+        String hashKey = redisKeyUtil.leafKey(leafName);
         if(!redisTemplate.hasKey(hashKey)){
             if(!findCountFromDB(leafName))//沒有就去DB查
-                throw new IllegalStateException("findCountFromDB is busy, try later");
+                throw new IllegalStateException("FindCountFromDB is busy, try later");
         }
 
         //已確定存在, 查詢redis
@@ -61,6 +66,11 @@ public class ViewServiceImpl implements ViewService {
         return leafDTO;
     }
 
+    /**
+     * 從Redis增加count, 若不存在則去DB查然後增加
+     * @param leafDTO
+     * @throws Exception
+     */
     public void countIncr(LeafDTO leafDTO) throws Exception {
         String leafName = leafDTO.getLeafName();
         if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
@@ -69,10 +79,10 @@ public class ViewServiceImpl implements ViewService {
         if(field.isEmpty()) throw new IllegalStateException("VoteFor is not defined");
 
         //先檢查是否存在redis
-        String hashKey = redisKeyUtil.getLeafKey(leafName);
+        String hashKey = redisKeyUtil.leafKey(leafName);
         if(!redisTemplate.hasKey(hashKey)){
             if(!findCountFromDB(leafName))//沒有就去DB查
-                throw new IllegalStateException("findCountFromDB is busy, try later");
+                throw new IllegalStateException("FindCountFromDB is busy, try later");
         }
 
         RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
@@ -99,7 +109,7 @@ public class ViewServiceImpl implements ViewService {
             tryLock = lock.tryLock();
             if(tryLock){
                 //Cache Penetration, 防止緩存穿透, 查不到先設為0
-                Optional<Leaf> leaf = leafCountDAO.findByLeafName(leafName);
+                Optional<Leaf> leaf = leafDAO.findByLeafName(leafName);
                 Map<String, Long> fields = leaf
                         .map(l -> Map.of("good", l.getGood(), "bad", l.getBad()))
                         .orElse(Map.of("good", 0L, "bad", 0L));
@@ -108,7 +118,7 @@ public class ViewServiceImpl implements ViewService {
                     log.error("Find leaf count from DB but leafName:{} was not found", leafName);
 
                 //Cache Avalanche, 防止緩存雪崩, 設定亂數過期時間
-                String hashKey = redisKeyUtil.getLeafKey(leafName);
+                String hashKey = redisKeyUtil.leafKey(leafName);
                 redisTemplate.opsForHash().putAll(hashKey, fields);
                 redisTemplate.expire(hashKey,redisKeyUtil.getExpireTime(EXPIRE_TIME), TimeUnit.SECONDS);
                 log.info("FindCountFromDB for leafName:{} succeeded", leafName);
@@ -128,84 +138,71 @@ public class ViewServiceImpl implements ViewService {
         return tryLock;
     }
 
-/*
+    /**
+     * 透過批次將Redis資料存入DB, 採用分布式鎖避免批次衝突
+     * @return
+     * @throws Exception
+     */
+    public boolean saveCountToDB() throws Exception {
+        RLock lock = redisson.getLock(redisKeyUtil.systemLock("saveCountToDB"));
+        Boolean tryLock = false;
+        try{
+            tryLock = lock.tryLock();
+            if(tryLock) {
+                //1 查詢要更新的key放到redis備用
+                String allName = (String) redisTemplate.opsForValue().get(redisKeyUtil.SYSTEM_FEAFNAME);
+                if(allName == null){
+                    List<String> nameList = leafDAO.findLeafName();
+                    allName = nameList.stream().collect(Collectors.joining(","));
+                    redisTemplate.opsForValue().set(redisKeyUtil.SYSTEM_FEAFNAME, allName);
+                }
 
+                //2 從Redis中取出要更新的內容, 沒用的內容就讓他自然過期
+                String[] nameArr = allName.split(",");
+                Map<String, Map<String, Number>> updateMap = new HashMap<>();
+                for (String leafName : nameArr) {
+                    String hashKey = redisKeyUtil.leafKey(leafName);
+                    if (redisTemplate.hasKey(hashKey)) {
+                        RReadWriteLock rwLock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+                        try {
+                            rwLock.readLock().lock();
+                            updateMap.put(leafName, redisTemplate.opsForHash().entries(hashKey));
+                        } catch (Exception e) {
+                            log.error("", e);
+                        } finally {
+                            rwLock.readLock().unlock();
+                        }
+                    }
+                }
 
-
-
-
-    public LeafDTO findCountFromRedis(String leafName) {
-        if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
-
-        RReadWriteLock lock = redisson.getReadWriteLock(keyUtil.lock(leafName));
-        LeafDTO leafDTO = new LeafDTO();
-        try {
-            lock.readLock().lock();
-            String hashKey = keyUtil.getLeafKey(leafName);
-            leafDTO =  (LeafDTO) redisTemplate.opsForHash().entries(hashKey);
-            if(leafDTO == null)
-                findCountFromDB(leafName);//重新去DB抓
-
-            System.out.println("REDIS called get " + Thread.currentThread().getName());
-        }catch (Exception e){
-            log.error("", e);
-        }finally {
-            lock.readLock().unlock();
+                //3 更新DB
+                LocalDateTime now = timeUtil.now();
+                for (Map.Entry<String, Map<String, Number>> entry : updateMap.entrySet()) {
+                    String leafName = entry.getKey();
+                    Map<String, Number> counts = entry.getValue();
+                    long good = counts.get("good").longValue();
+                    long bad = counts.get("bad").longValue();
+                    leafDAO.updateCounts(good, bad, now, leafName);
+                }
+            }else{
+                log.error("SaveCountToDB for was started, so skip this time");
+            }
+        } catch (Exception e) {
+            log.error("Save leaf count from DB failed", e);
+            throw new Exception(e);
+        } finally {
+            if(lock.isLocked() && lock.isHeldByCurrentThread()){
+                lock.unlock();//已鎖定且為當前線程的鎖, 才解鎖
+            }
         }
-        return leafDTO;
+        return tryLock;
     }
 
-
-
-
-
-
-    public void saveCountToDB() {
-        RLock lock = redisson.getLock(keyUtil.saveLeafCountDB());//防止分佈式系統重跑才需要這個lock
-        String leafName = "";
-        if(lock.isLocked()) return;
-        try {
-            lock.lock();
-            if(redisTemplate.opsForList().size(keyUtil.schQueue()) == 0)
-                return;
-
-            leafName = (String) redisTemplate.opsForList().leftPop(keyUtil.schQueue());
-
-            System.out.println("REDIS saveLeafCountToDB leafName=" + leafName + Thread.currentThread().getName());
-
-            RReadWriteLock rwLock = redisson.getReadWriteLock(keyUtil.lock(leafName));
-            LeafDTO leafDTO = new LeafDTO();
-            try {
-                lock.readLock().lock();
-                String hashKey = keyUtil.getLeafKey(leafName);
-                leafDTO =  (LeafDTO) redisTemplate.opsForHash().entries(hashKey);
-            }catch (Exception e){
-                log.error("", e);
-            }finally {
-                rwLock.readLock().unlock();
-            }
-
-            if(leafDTO != null) {
-                redisTemplate.opsForList().rightPush(keyUtil.saveLeafCountDB(), leafName);
-                leafService.updateCount(leafDTO);
-                System.out.println("REDIS saveLeafCountToDB OK!! leafName=" + leafName + Thread.currentThread().getName());
-            }
-
-            System.out.println("REDIS saveLeafCountToDB OK" + Thread.currentThread().getName());
-        }catch (Exception e){
-            log.error("", e);
-            if(!leafName.isEmpty()){
-                redisTemplate.opsForList().rightPush(keyUtil.saveLeafCountDB(), leafName);
-                log.error("save leaf:" + leafName + " error, offer to queue!", e);
-            }
-        }finally {
-            lock.unlock();
-        }
-    }
-
-
-*/
-
+    /**
+     * 轉換voteFor為good或bad
+     * @param voteFor
+     * @return
+     */
     private String getCountType(int voteFor) {
         for (CountType type : CountType.values()) {
             if(type.getVoteFor() == voteFor)
@@ -213,27 +210,4 @@ public class ViewServiceImpl implements ViewService {
         }
         return "";
     }
-
-/* 還是會有漏網之魚？
-    RLock lock = redisson.getLock("testlock");
-        log.error("before islocked:" + lock.isLocked());
-        try {//最多等待3秒，上锁以后10秒自动解锁
-//            boolean trylock = lock.tryLock(3, 10, TimeUnit.SECONDS);
-        boolean trylock = lock.tryLock();
-        log.error("after trylock:" + trylock + " islocked : " + lock.isLocked());
-        if(trylock){
-            Thread.sleep(10000);
-        }else{
-            log.error("NOT GET LOCK !! islocked:" + lock.isLocked());
-        }
-    }catch (Exception e){
-        log.error("", e);
-    }finally {
-        if(lock.isLocked() && lock.isHeldByCurrentThread()){
-            log.info("do unlock!");
-            lock.unlock();
-        }
-    }
-        log.info("FINISH");
-*/
 }
