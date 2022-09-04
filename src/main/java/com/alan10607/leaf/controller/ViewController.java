@@ -28,11 +28,9 @@ public class ViewController {
     public String index(@RequestParam(value = "leafName", required = false) String leafName, Model model){
         try{
             if(leafName == null) leafName = "leaf";//!!!暫時給個預設 還沒想好怎麼給明子
-            LeafDTO leafDTO = viewService.findCountFromRedis(leafName);
 
-            model.addAttribute("leafName", "leaf");
+            model.addAttribute("leafName", leafName);
             model.addAttribute("baseUrl", "/view");
-//            model.addAttribute("leafDTO", leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());
         }
@@ -54,7 +52,7 @@ public class ViewController {
     @PostMapping("/view/getCount")
     public ResponseEntity getCount(@RequestBody LeafDTO leafDTO){
         try{
-            leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
+            leafDTO = viewService.findCountFromRedis(leafDTO);
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());
@@ -67,9 +65,10 @@ public class ViewController {
         try{
             int r = (int) (Math.random() * 10);
             if(r <= 1){
-                viewService.countIncr(leafDTO.getLeafName(), r);
+                leafDTO.setVoteFor(r + 1);
+                viewService.countIncr(leafDTO);
             }else{
-                leafDTO = viewService.findCountFromRedis(leafDTO.getLeafName());
+                leafDTO = viewService.findCountFromRedis(leafDTO);
             }
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
@@ -77,12 +76,23 @@ public class ViewController {
             return responseUtil.err(e);
         }
     }
+
     @PostMapping("/view/test2")
     public ResponseEntity test2(@RequestBody LeafDTO leafDTO){
         try{
+            //viewService.findCountFromRedis(leafDTO);
+            viewService.countIncr(leafDTO);
+            return responseUtil.ok(leafDTO);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return responseUtil.err(e);
+        }
+    }
 
+    @PostMapping("/view/test3")
+    public ResponseEntity test3(@RequestBody LeafDTO leafDTO){
+        try{
             viewService.findCountFromDB(leafDTO.getLeafName());
-
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
             log.error(e.getMessage());

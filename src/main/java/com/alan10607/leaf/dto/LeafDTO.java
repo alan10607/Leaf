@@ -11,4 +11,5 @@ public class LeafDTO {
     private String leafName;
     private Long good;
     private Long bad;
+    private int voteFor;
 }

@@ -16,10 +16,7 @@ public class RedisKeyUtil {
      * @return
      */
     public String getLeafKey(String leafName){
-        return new StringBuilder(HASH_KEY_LEAF_PREFIX)
-                .append(":")
-                .append(leafName)
-                .toString();
+        return String.format("leaf:%s", leafName);
     }
 
 
@@ -28,8 +25,8 @@ public class RedisKeyUtil {
     }
 
 
-    public String getLeafCountDB(){
-        return "lock-system-getLeafCountDB";
+    public String systemLock(String functionName){
+        return String.format("lock-system-%s", functionName);
     }
 
     public String saveLeafCountDB(){

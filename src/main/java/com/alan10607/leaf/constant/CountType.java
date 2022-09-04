@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CountType {
     GOOD(1, "good"),
-    BAD(0, "bad");
+    BAD(2, "bad");
     private int voteFor;
     private String field;
 }
