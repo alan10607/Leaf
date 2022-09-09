@@ -1,7 +1,7 @@
 package com.alan10607.leaf.controller;
 
-import com.alan10607.leaf.dto.LeafDTO;
-import com.alan10607.leaf.service.LeafService;
+import com.alan10607.leaf.dto.LeafUserDTO;
+import com.alan10607.leaf.service.UserService;
 import com.alan10607.leaf.util.ResponseUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,40 +14,40 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/leaf")
+@RequestMapping(path = "/user")
 @AllArgsConstructor
 @Slf4j
-public class LeafController {
+public class UserController {
 
-    private final LeafService leafService;
+    private final UserService userService;
     private final ResponseUtil responseUtil;
 
-    @PostMapping("/find")
-    public ResponseEntity find(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/findUser")
+    public ResponseEntity findUser(@RequestBody LeafUserDTO leafUserDTO){
         try{
-            leafDTO = leafService.find(leafDTO);
-            return responseUtil.ok(leafDTO);
+            leafUserDTO = userService.findUser(leafUserDTO);
+            return responseUtil.ok(leafUserDTO);
         }catch (Exception e){
             log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }
 
-    @PostMapping("/findAll")
-    public ResponseEntity findAll(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/findAllUser")
+    public ResponseEntity findAllUser(@RequestBody LeafUserDTO leafUserDTO){
         try{
-            List<LeafDTO> leafDTOList = leafService.findAll();
-            return responseUtil.ok(leafDTOList);
+            List<LeafUserDTO> leafUserDTOList = userService.findAllUser();
+            return responseUtil.ok(leafUserDTOList);
         }catch (Exception e){
             log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity update(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/createUser")
+    public ResponseEntity createUser(@RequestBody LeafUserDTO leafUserDTO){
         try{
-            leafService.update(leafDTO);
+            userService.createUser(leafUserDTO);
             return responseUtil.ok();
         }catch (Exception e){
             log.error(e.getMessage());
@@ -55,21 +55,10 @@ public class LeafController {
         }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity create(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/deleteUser")
+    public ResponseEntity deleteUser(@RequestBody LeafUserDTO leafUserDTO){
         try{
-            leafService.create(leafDTO);
-            return responseUtil.ok();
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return responseUtil.err(e);
-        }
-    }
-
-    @PostMapping("/delete")
-    public ResponseEntity delete(@RequestBody LeafDTO leafDTO){
-        try{
-            leafService.delete(leafDTO);
+            userService.deleteUser(leafUserDTO);
             return responseUtil.ok();
         }catch (Exception e){
             log.error(e.getMessage());

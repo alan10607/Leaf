@@ -39,7 +39,7 @@ public class RedisKeyUtil {
      * @param sec
      * @return
      */
-    public int getExpireTime(int sec){
+    public int getRandomExpire(int sec){
         return ((int) (Math.random() * 60)) + sec;//加上60秒
     }
 

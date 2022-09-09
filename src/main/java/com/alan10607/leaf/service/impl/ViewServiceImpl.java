@@ -71,12 +71,12 @@ public class ViewServiceImpl implements ViewService {
      * @param leafDTO
      * @throws Exception
      */
-    public void countIncr(LeafDTO leafDTO) throws Exception {
+    public LeafDTO countIncr(LeafDTO leafDTO) throws Exception {
         String leafName = leafDTO.getLeafName();
         if(Strings.isBlank(leafName)) throw new IllegalStateException("LeafName can't be blank");
 
-        String field = getCountType(leafDTO.getVoteFor());
-        if(field.isEmpty()) throw new IllegalStateException("VoteFor is not defined");
+        CountType countType = getCountType(leafDTO.getVoteFor());
+        if(countType == CountType.UNDEFINED) throw new IllegalStateException("VoteFor is not defined");
 
         //先檢查是否存在redis
         String hashKey = redisKeyUtil.leafKey(leafName);
@@ -85,15 +85,20 @@ public class ViewServiceImpl implements ViewService {
                 throw new IllegalStateException("FindCountFromDB is busy, try later");
         }
 
+        long res = -1;
         RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
         try {
             lock.writeLock().lock();
-            redisTemplate.opsForHash().increment(hashKey, field, 1);
+            res = redisTemplate.opsForHash().increment(hashKey, countType.getField(), 1);
+
+            //Cache Avalanche, 防止緩存雪崩, 設定亂數過期時間
+            redisTemplate.expire(hashKey, redisKeyUtil.getRandomExpire(EXPIRE_TIME), TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("", e);
         } finally {
             lock.writeLock().unlock();
         }
+        return countType.getResLeafDTO(leafDTO, res);
     }
 
     /**
@@ -117,10 +122,8 @@ public class ViewServiceImpl implements ViewService {
                 if(leaf.isEmpty())
                     log.error("Find leaf count from DB but leafName:{} was not found", leafName);
 
-                //Cache Avalanche, 防止緩存雪崩, 設定亂數過期時間
                 String hashKey = redisKeyUtil.leafKey(leafName);
                 redisTemplate.opsForHash().putAll(hashKey, fields);
-                redisTemplate.expire(hashKey,redisKeyUtil.getExpireTime(EXPIRE_TIME), TimeUnit.SECONDS);
                 log.info("FindCountFromDB for leafName:{} succeeded", leafName);
             }else{
                 //Hotspot Invalid, 防止緩存擊穿, 若已經有查詢, 就先等一下再去Redis看
@@ -149,18 +152,13 @@ public class ViewServiceImpl implements ViewService {
         try{
             tryLock = lock.tryLock();
             if(tryLock) {
-                //1 查詢要更新的key放到redis備用
-                String allName = (String) redisTemplate.opsForValue().get(redisKeyUtil.SYSTEM_FEAFNAME);
-                if(allName == null){
-                    List<String> nameList = leafDAO.findLeafName();
-                    allName = nameList.stream().collect(Collectors.joining(","));
-                    redisTemplate.opsForValue().set(redisKeyUtil.SYSTEM_FEAFNAME, allName);
-                }
+                //1 查詢要更新的key, 如果沒有就到DB查
+                String nameJoin = (String) redisTemplate.opsForValue().get(redisKeyUtil.SYSTEM_FEAFNAME);
+                List<String> nameList = nameJoin == null ? findAllLeafNameFromDB() : Arrays.asList(nameJoin.split(","));
 
                 //2 從Redis中取出要更新的內容, 沒用的內容就讓他自然過期
-                String[] nameArr = allName.split(",");
                 Map<String, Map<String, Number>> updateMap = new HashMap<>();
-                for (String leafName : nameArr) {
+                for (String leafName : nameList) {
                     String hashKey = redisKeyUtil.leafKey(leafName);
                     if (redisTemplate.hasKey(hashKey)) {
                         RReadWriteLock rwLock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
@@ -203,11 +201,22 @@ public class ViewServiceImpl implements ViewService {
      * @param voteFor
      * @return
      */
-    private String getCountType(int voteFor) {
+    private CountType getCountType(String voteFor) {
         for (CountType type : CountType.values()) {
-            if(type.getVoteFor() == voteFor)
-                return type.getField();
+            if(type.getField().equals(voteFor))
+                return type;
         }
-        return "";
+        return CountType.UNDEFINED;
+    }
+
+    /**
+     * 到DB抓取所有leafName放到redis, 用於批次定期更新
+     * @return
+     */
+    public List<String> findAllLeafNameFromDB(){
+        List<String> nameList = leafDAO.findLeafName();
+        String allName = nameList.stream().collect(Collectors.joining(","));
+        redisTemplate.opsForValue().set(redisKeyUtil.SYSTEM_FEAFNAME, allName);
+        return nameList;
     }
 }

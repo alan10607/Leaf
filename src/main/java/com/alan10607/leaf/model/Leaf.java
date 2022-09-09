@@ -4,10 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 
-import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Data
@@ -16,7 +19,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class Leaf {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -27,9 +30,9 @@ public class Leaf {
     private LocalDateTime updatedDate;
 
     public Leaf(String leafName,
-                     Long good,
-                     Long bad,
-                     LocalDateTime updatedDate) {
+                Long good,
+                Long bad,
+                LocalDateTime updatedDate) {
         this.leafName = leafName;
         this.good = good;
         this.bad = bad;
