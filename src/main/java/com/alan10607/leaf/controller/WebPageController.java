@@ -37,14 +37,14 @@ public class WebPageController {
         return "index.html";
     }
 
-    @RequestMapping("/admin")
+    @RequestMapping("/login")
     public String admin(Model model) {
-        return "admin/admin.html";
+        return "login.html";
     }
 
     @RequestMapping("/admin/manager")
     public String manager(Model model) {
-        return "admin/manager.html";
+        return "manager.html";
     }
 
     @GetMapping("/test")

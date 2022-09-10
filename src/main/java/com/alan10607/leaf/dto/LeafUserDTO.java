@@ -22,13 +22,11 @@ public class LeafUserDTO {
     public LeafUserDTO(long id,
                        String userName,
                        String email,
-                       String pw,
                        List<LeafRole> userRole,
                        LocalDateTime updatedDate) {
         this.id = id;
         this.userName = userName;
         this.email = email;
-        this.pw = pw;
         this.userRole = userRole;
         this.updatedDate = updatedDate;
     }

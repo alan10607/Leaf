@@ -23,7 +23,8 @@ public class ResponseUtil {
 
     public ResponseEntity ok(Object result) {
         body.put("status", OK.toString());
-        return getResponseEntity(result);
+        body.put("result", result);
+        return ResponseEntity.ok().body(body);
     }
 
     /**
@@ -32,16 +33,8 @@ public class ResponseUtil {
      */
     public ResponseEntity err(Exception e) {
         body.put("status", BAD_REQUEST.toString());
-        return getResponseEntity(e.getMessage());
+        body.put("result", e.getMessage());
+        return ResponseEntity.badRequest().body(body);
     }
 
-    /**
-     * Build whole into ResponseEntity
-     * @param result
-     * @return
-     */
-    public ResponseEntity getResponseEntity(Object result) {
-        body.put("result", result);
-        return ResponseEntity.ok().body(body);
-    }
 }
