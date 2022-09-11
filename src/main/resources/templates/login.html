@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org">
+<head>
+    <title>LEAF</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1">
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="icon.png">
+    <link rel="stylesheet" th:href="@{css/main.css}">
+    <script type="text/JavaScript" th:src="@{js/main.js}"></script>
+    <script type="text/JavaScript" th:src="@{js/jquery-3.6.1.min.js}"></script>
+</head>
+<script th:inline="javascript">
+</script>
+<body>
+<h2>LEAF LOGIN</h2>
+<form method="post" action="loginProcessing">
+    <p>
+        <span>Email:</span>
+        <input type="text" name="username" required autofocus/>
+    </p>
+    <p>
+        <span>Password:</span>
+        <input type="password" name="password" required/>
+    </p>
+    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"  th:value="${_csrf.token}" />
+    <button type="submit">Login</button>
+</form>
+<br><br><br>
+<span th:if="${param.error != null}">Login failed</span>
+<span th:if="${param.logout != null}">Logout succeeded</span>
+</body>
+</html>

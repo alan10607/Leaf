@@ -14,7 +14,7 @@ function playClickSound() {
 setInterval(updateCount, UPDATE_COUNT_INTERVAL);
 function updateCount() {
 	var data = {"leafName" : LEAF_NAME};
-    post("/view/getCount", data, updateCountAfter, null);
+    post("/view/findCount", data, updateCountAfter, null);
 }
 
 function updateCountAfter(leafDTO){

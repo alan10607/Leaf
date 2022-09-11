@@ -22,8 +22,8 @@ public class ViewController {
     private final ViewService viewService;
     private final ResponseUtil responseUtil;
 
-    @PostMapping("/getCount")
-    public ResponseEntity getCount(@RequestBody LeafDTO leafDTO){
+    @PostMapping("/findCount")
+    public ResponseEntity findCount(@RequestBody LeafDTO leafDTO){
         try{
             leafDTO = viewService.findCountFromRedis(leafDTO);
             return responseUtil.ok(leafDTO);
@@ -39,7 +39,7 @@ public class ViewController {
             leafDTO = viewService.countIncr(leafDTO);
             return responseUtil.ok(leafDTO);
         }catch (Exception e){
-            log.error("", e);
+            log.error(e.getMessage());
             return responseUtil.err(e);
         }
     }

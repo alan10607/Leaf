@@ -118,6 +118,15 @@ public class UserServiceImpl implements UserService, UserDetailsService{
                     bCryptPasswordEncoder.encode("alan"),
                     Arrays.asList(leafRole),
                     timeUtil.now()));
+
+
+            LeafRole leafRole2 = leafRoleDAO.findByRoleName(LeafRoleType.NORMAL.name());
+            leafUserDAO.save(new LeafUser(2L,
+                    "ala",
+                    "ala",
+                    bCryptPasswordEncoder.encode("ala"),
+                    Arrays.asList(leafRole2),
+                    timeUtil.now()));
         };
     }
 }

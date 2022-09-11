@@ -1,18 +1,25 @@
 package com.alan10607.leaf.controller;
 
+import com.alan10607.leaf.dto.LeafDTO;
+import com.alan10607.leaf.service.LeafService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 @Controller
 @RequestMapping(path = "/")
 @AllArgsConstructor
 @Slf4j
 public class WebPageController {
+    private LeafService leafService;
 
     @RequestMapping("/index")
     public String index(Model model){
@@ -27,12 +34,19 @@ public class WebPageController {
     }
 
     @RequestMapping("/index/{leafName}")
-    public String indexWithLeafName(@PathVariable("leafName") String leafName, Model model){
+    public String indexWithLeafName(@PathVariable("leafName") String leafName,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    Model model){
         try{
-            model.addAttribute("leafName", leafName);
+            LeafDTO leafDTO = new LeafDTO();
+            leafDTO.setLeafName(leafName);
+            leafDTO = leafService.find(leafDTO);
+            model.addAttribute("leafName", leafDTO.getLeafName());
             model.addAttribute("picFileName", "leaf.jpg");
         }catch (Exception e){
-            log.error(e.getMessage());
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return err(request, response, model);
         }
         return "index.html";
     }
@@ -42,9 +56,19 @@ public class WebPageController {
         return "login.html";
     }
 
-    @RequestMapping("/admin/manager")
+    @RequestMapping("/admin")
     public String manager(Model model) {
-        return "manager.html";
+        return "admin/admin.html";
+    }
+
+    @RequestMapping("/err")
+    public String err(HttpServletRequest request, HttpServletResponse response, Model model) {
+        try{
+            model.addAttribute("status", response.getStatus());
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
+        return "err.html";
     }
 
     @GetMapping("/test")

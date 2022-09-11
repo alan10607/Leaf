@@ -1,9 +1,12 @@
 package com.alan10607.leaf.config;
 
+import com.alan10607.leaf.constant.LeafRoleType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.ConfigurableWebServerFactory;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -13,20 +16,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Slf4j
 @EnableWebSecurity
 @EnableMethodSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-
-    @Autowired
-    @Lazy
-    private LoginFilter loginFilter;
-
-    @Autowired
-    private JwtFilter jwtFilter;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -44,79 +38,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //代替WebSecurityConfigurerAdapter.configure(HttpSecurity http)
-        //authenticationJWTFilter.setFilterProcessesUrl("/admin");
         http.csrf().disable();//跨域請求偽造, 測試時禁用
-//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不使用ession
-//        http.authorizeRequests().anyRequest().permitAll();
-//        http.formLogin().loginPage("/login").defaultSuccessUrl("/admin/manager").failureForwardUrl("/index");
-        //     http.formLogin().loginPage("/login").defaultSuccessUrl("/admin/manager").failureForwardUrl("/index");
-//        http.logout().logoutUrl("/logout").logoutSuccessUrl("/index");
-
-        http.authorizeRequests().anyRequest().permitAll();
-//        http.authorizeRequests().antMatchers("/index", "/css/**", "/js/**", "/pic/**", "/view/**", "/login").permitAll();//公開葉面
-//        http.authorizeRequests().antMatchers("/admin/**").hasAuthority(LeafRoleType.ADMIN.name());//限制為admin權限訪問
-//        http.authorizeRequests().anyRequest().authenticated();
-
-
-//        http.addFilter(jwtFilter);//驗證實例
-        http.addFilterAt(loginFilter, BasicAuthenticationFilter.class);
-        http.addFilterBefore(jwtFilter, BasicAuthenticationFilter.class);
-//        http.httpBasic();
+//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不使用session
+        http.formLogin().loginPage("/login").loginProcessingUrl("/loginProcessing").defaultSuccessUrl("/admin").failureForwardUrl("/login?error");
+        http.logout().logoutUrl("/logoutProcessing").logoutSuccessUrl("/login?logout");
+        http.authorizeRequests().antMatchers("/index/**", "/css/**", "/js/**", "/pic/**", "/view/**", "/login").permitAll();//公開葉面
+        http.authorizeRequests().anyRequest().hasAuthority(LeafRoleType.ADMIN.name());//限制為admin權限訪問
+        http.exceptionHandling().accessDeniedPage("/err");
         return http.build();
     }
 
+    /**
+     * 設定自訂錯誤頁面
+     * @return
+     */
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
+        String errorPage = "/err";
+        return factory -> {
+            factory.addErrorPages(
+                    new ErrorPage(HttpStatus.NOT_FOUND, errorPage),//404
+                    new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, errorPage));//500
+        };
+    }
+
 }
-//
-//
-//
-//
-//public class SecurityConfig {
-//    private final AuthenticationJWTFilter authenticationJWTFilter;
-//    private final AuthorizationJWTFilter authorizationJWTFilter;
-//    public final UserDetailsService userDetailsService;
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        //代替WebSecurityConfigurerAdapter.configure(HttpSecurity http)
-//        authenticationJWTFilter.setFilterProcessesUrl("/admin");
-//        http.csrf().disable();//跨域請求偽造, 測試時禁用
-//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不使用ession
-//        http.formLogin().loginPage("/admin").defaultSuccessUrl("/admin/manager").failureForwardUrl("/admin");
-//        http.logout().logoutUrl("/logout").logoutSuccessUrl("/index");
-//        http.authorizeRequests().antMatchers(HttpMethod.GET, SecurityUtil.OPEN_URL).permitAll();//公開葉面
-//        http.authorizeRequests().antMatchers(HttpMethod.POST, SecurityUtil.ADMIN_URL).hasAuthority("admin");//限制為admin權限訪問
-//        http.authorizeRequests().anyRequest().authenticated();
-//        http.addFilter(authenticationJWTFilter);//驗證實例
-//        http.addFilterBefore(authorizationJWTFilter, UsernamePasswordAuthenticationFilter.class);//設定授權在驗證之前
-//        http.httpBasic();
-//        return http.build();
-//    }
-//
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//        //代替WebSecurityConfigurerAdapter.configure(AuthenticationManagerBuilder auth)
-//        DaoAuthenticationProvider dao = new DaoAuthenticationProvider();
-//        dao.setUserDetailsService(userDetailsService);
-//        return new ProviderManager(dao);
-//    }
-//
-////    @Override
-////    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-////        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
-////    }
-//
-//
-////    https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
-////    新功能，會忽略以下
-////    @Bean
-////    public WebSecurityCustomizer webSecurityCustomizer() {
-////        return (web) -> web.ignoring().antMatchers("/ignore1", "/ignore2");
-////    }
-//
-//
-//
-////    @Bean
-////    public AuthenticationManager authenticationManagerBean() throws Exception {
-////        return super.authenticationManagerBean();
-////    }
-//
-//}
