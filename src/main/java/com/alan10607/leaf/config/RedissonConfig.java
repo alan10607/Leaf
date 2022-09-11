@@ -30,10 +30,9 @@ public class RedissonConfig {
      */
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redisson() throws IOException {
+        log.info("RedissonConfig config address={}", address);
         Config config = new Config();
-        config.useSingleServer().setAddress(address)
-                .setPassword(password);
-
+        config.useSingleServer().setAddress(address).setPassword(password);
         log.info("RedissonConfig config succeeded");
         return Redisson.create(config);
     }

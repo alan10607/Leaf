@@ -24,6 +24,10 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Long> redisTemplate(LettuceConnectionFactory connectionFactory){
+        log.info("RedisTemplate config HostName={}, Port={}",
+                connectionFactory.getHostName(),
+                connectionFactory.getPort());
+
         RedisTemplate<String, Long> template = new RedisTemplate<>();
 
         //設定連線工廠, LettuceConnectionFactory設定在application.properties
