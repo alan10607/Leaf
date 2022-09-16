@@ -18,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class LeafController {
-
     private final LeafService leafService;
     private final ResponseUtil responseUtil;
 

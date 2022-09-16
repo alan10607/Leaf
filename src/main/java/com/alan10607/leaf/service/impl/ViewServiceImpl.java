@@ -50,7 +50,7 @@ public class ViewServiceImpl implements ViewService {
         }
 
         //已確定存在, 查詢redis
-        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.rwLock(leafName));
         Map<String, Number> map = new HashMap<>();//設置為Number, 因為超過2^31-1時會是Long, 否則會是Integer
         try {
             lock.readLock().lock();
@@ -86,7 +86,7 @@ public class ViewServiceImpl implements ViewService {
         }
 
         long res = -1;
-        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+        RReadWriteLock lock = redisson.getReadWriteLock(redisKeyUtil.rwLock(leafName));
         try {
             lock.writeLock().lock();
             res = redisTemplate.opsForHash().increment(hashKey, countType.getField(), 1);
@@ -108,7 +108,7 @@ public class ViewServiceImpl implements ViewService {
      * @throws Exception
      */
     public boolean findCountFromDB(String leafName) throws Exception {
-        RLock lock = redisson.getLock(redisKeyUtil.systemLock("findCountFromDB"));
+        RLock lock = redisson.getLock(redisKeyUtil.LOCK_FIND_COUNT_FROM_DB);
         Boolean tryLock = false;
         try{
             tryLock = lock.tryLock();
@@ -147,13 +147,13 @@ public class ViewServiceImpl implements ViewService {
      * @throws Exception
      */
     public boolean saveCountToDB() throws Exception {
-        RLock lock = redisson.getLock(redisKeyUtil.systemLock("saveCountToDB"));
+        RLock lock = redisson.getLock(redisKeyUtil.LOCK_SAVE_COUNT_TO_DB);
         Boolean tryLock = false;
         try{
             tryLock = lock.tryLock();
             if(tryLock) {
                 //1 查詢要更新的key, 如果沒有就到DB查
-                String nameJoin = (String) redisTemplate.opsForValue().get(redisKeyUtil.SYSTEM_FEAFNAME);
+                String nameJoin = (String) redisTemplate.opsForValue().get(redisKeyUtil.SYSTEM_DB_LEAF_NAME);
                 List<String> nameList = nameJoin == null ? findAllLeafNameFromDB() : Arrays.asList(nameJoin.split(","));
 
                 //2 從Redis中取出要更新的內容, 沒用的內容就讓他自然過期
@@ -161,7 +161,7 @@ public class ViewServiceImpl implements ViewService {
                 for (String leafName : nameList) {
                     String hashKey = redisKeyUtil.leafKey(leafName);
                     if (redisTemplate.hasKey(hashKey)) {
-                        RReadWriteLock rwLock = redisson.getReadWriteLock(redisKeyUtil.lock(leafName));
+                        RReadWriteLock rwLock = redisson.getReadWriteLock(redisKeyUtil.rwLock(leafName));
                         try {
                             rwLock.readLock().lock();
                             updateMap.put(leafName, redisTemplate.opsForHash().entries(hashKey));
@@ -216,7 +216,8 @@ public class ViewServiceImpl implements ViewService {
     public List<String> findAllLeafNameFromDB(){
         List<String> nameList = leafDAO.findLeafName();
         String allName = nameList.stream().collect(Collectors.joining(","));
-        redisTemplate.opsForValue().set(redisKeyUtil.SYSTEM_FEAFNAME, allName);
+        redisTemplate.opsForValue().set(redisKeyUtil.SYSTEM_DB_LEAF_NAME, allName);
         return nameList;
     }
+
 }

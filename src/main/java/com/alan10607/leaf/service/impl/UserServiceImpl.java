@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,6 +44,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
         leafUserDTO.setUpdatedDate(leafUser.getUpdatedDate());
         return leafUserDTO;
     }
+
     public List<LeafUserDTO> findAllUser() {
         List<LeafUserDTO> leafUserDTOList = leafUserDAO.findAll().stream()
                 .map((leafUser) ->
@@ -62,8 +62,6 @@ public class UserServiceImpl implements UserService, UserDetailsService{
         if(Strings.isBlank(leafUserDTO.getUserName())) throw new IllegalStateException("UserName can't be blank");
         if(Strings.isBlank(leafUserDTO.getEmail())) throw new IllegalStateException("Email can't be blank");
         if(Strings.isBlank(leafUserDTO.getPw())) throw new IllegalStateException("Password can't be blank");
-
-        String hash = DigestUtils.sha1DigestAsHex(leafUserDTO.getPw());//借用spring-data-redis:2.7.2 的方法
 
         leafUserDAO.findByEmail(leafUserDTO.getEmail())
                 .ifPresent((l) -> { throw new IllegalStateException("Email already exist"); });
@@ -99,7 +97,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
         LeafUser leafUser = leafUserDAO.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("Spring security get user email: %s not found", email)));
 
-        log.info("Spring security get user by email: {} info succeeded", email);
+        log.info("Spring security get user by email: {} succeeded", email);
 
         //org.springframework.security.core.userdetails.User
         return leafUser;
@@ -118,7 +116,6 @@ public class UserServiceImpl implements UserService, UserDetailsService{
                     bCryptPasswordEncoder.encode("alan"),
                     Arrays.asList(leafRole),
                     timeUtil.now()));
-
 
             LeafRole leafRole2 = leafRoleDAO.findByRoleName(LeafRoleType.NORMAL.name());
             leafUserDAO.save(new LeafUser(2L,

@@ -18,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class UserController {
-
     private final UserService userService;
     private final ResponseUtil responseUtil;
 

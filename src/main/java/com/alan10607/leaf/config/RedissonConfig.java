@@ -17,14 +17,14 @@ public class RedissonConfig {
     public String password;
 
     public RedissonConfig(@Value("${spring.redis.host}") String hostname,
-            @Value("${spring.redis.port}") String port,
-            @Value("${spring.redis.password}") String password) {
+                          @Value("${spring.redis.port}") String port,
+                          @Value("${spring.redis.password}") String password) {
         this.address = String.format("redis://%s:%s", hostname, port);
         this.password = password;
     }
 
     /**
-     * Build Redisson Client by redisson-config.yaml
+     * 設定並建立 RedissonClient
      * @return
      * @throws IOException
      */
@@ -33,7 +33,9 @@ public class RedissonConfig {
         log.info("RedissonConfig config address={}", address);
         Config config = new Config();
         config.useSingleServer().setAddress(address).setPassword(password);
+        RedissonClient redissonClient = Redisson.create(config);
         log.info("RedissonConfig config succeeded");
-        return Redisson.create(config);
+        return redissonClient;
     }
+
 }

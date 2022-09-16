@@ -22,6 +22,7 @@ function updateCountAfter(leafDTO){
     $("#bad").text(leafDTO.bad);
 }
 
+//按下投票
 function vote(voteFor){
     playClickSound();
 
@@ -35,4 +36,6 @@ function vote(voteFor){
 function voteAfter(leafDTO){
     if(leafDTO.good != null) $("#good").text(leafDTO.good);
     if(leafDTO.bad != null) $("#bad").text(leafDTO.bad);
-};
+    localStorage.leafYouCount = localStorage.leafYouCount == null ? 1 : (parseInt(localStorage.leafYouCount) + 1);
+    $("#you-pop").text(localStorage.leafYouCount);
+}

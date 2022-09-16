@@ -1,7 +1,6 @@
 package com.alan10607.leaf.controller;
 
 import com.alan10607.leaf.dto.LeafDTO;
-import com.alan10607.leaf.service.LeafService;
 import com.alan10607.leaf.service.ViewService;
 import com.alan10607.leaf.util.ResponseUtil;
 import lombok.AllArgsConstructor;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @Slf4j
 public class ViewController {
-
-    private final LeafService leafService;
     private final ViewService viewService;
     private final ResponseUtil responseUtil;
 
@@ -84,4 +81,5 @@ public class ViewController {
             return responseUtil.err(e);
         }
     }
+
 }

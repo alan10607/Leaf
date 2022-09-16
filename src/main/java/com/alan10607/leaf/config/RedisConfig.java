@@ -22,6 +22,11 @@ public class RedisConfig {
 //        return new LettuceConnectionFactory(conf);
 //    }
 
+    /**
+     * 設定redis連線實例, Spring Boots預設用Lettuce
+     * @param connectionFactory
+     * @return
+     */
     @Bean
     public RedisTemplate<String, Long> redisTemplate(LettuceConnectionFactory connectionFactory){
         log.info("RedisTemplate config HostName={}, Port={}",
@@ -50,6 +55,7 @@ public class RedisConfig {
 
         //設定這些參數
         template.afterPropertiesSet();
+
         log.info("RedisTemplate config succeeded");
         return template;
     }

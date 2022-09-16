@@ -1,7 +1,6 @@
 package com.alan10607.leaf.schedule;
 
 import com.alan10607.leaf.service.ViewService;
-import com.alan10607.leaf.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -23,7 +22,7 @@ public class RedisSchedule extends QuartzJobBean {
             log.error("Schedule saveCountToDB fail");
             throw new JobExecutionException(e);
         }finally {
-            log.info("End schedule saveCountToDB");
+//            log.info("End schedule saveCountToDB");
         }
     }
 

@@ -19,7 +19,12 @@ import javax.servlet.http.HttpServletResponse;
 @AllArgsConstructor
 @Slf4j
 public class WebPageController {
-    private LeafService leafService;
+    private final LeafService leafService;
+
+    @RequestMapping("/")
+    public String root(Model model){
+        return index(model);
+    }
 
     @RequestMapping("/index")
     public String index(Model model){
@@ -45,7 +50,7 @@ public class WebPageController {
             model.addAttribute("leafName", leafDTO.getLeafName());
             model.addAttribute("picFileName", "leaf.jpg");
         }catch (Exception e){
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+            response.setStatus(HttpStatus.NOT_FOUND.value());//查不到則回404
             return err(request, response, model);
         }
         return "index.html";

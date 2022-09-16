@@ -7,8 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1">
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="icon.png">
+    <link rel="stylesheet" th:href="@{~/css/main.css}">
 </head>
 <body>
-<p th:if="${status != null}" th:text="${status}"></p>
+<h3 align="center" th:if="${status != null}" th:text="${status}"></h3>
+<div id="bg" class="full-screan center">
+    <div>
+        <img id="err-img" class="leaf-img" th:src="@{pic/leaf.jpg}">
+    </div>
+</div>
 </body>
 </html>
