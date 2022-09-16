@@ -1,5 +1,5 @@
-function consoleShowError(result){
-    $("#manager-console").text(result);
+function consoleShowError(str){
+    $("#admin-console").text(str);
 }
 
 //查詢所有leaf
@@ -27,9 +27,9 @@ function findAllLeafAfter(leafDTOList){
     $("#leafTBody").html(tBody);
 };
 
-function findLeafError(result){
+function findLeafError(xhr){
     $("#leafTBody").html("");
-    consoleShowError("Error: " + result);
+    consoleShowError("Error: " + JSON.stringify(xhr));
 };
 
 //建立leaf
@@ -113,4 +113,4 @@ function deleteUser(){
     }else{
          consoleShowError("No user name input");
     }
- }
+}
