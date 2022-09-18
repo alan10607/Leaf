@@ -1,5 +1,8 @@
 # Leaf
 <p align="center">
+	<a href="http://35.201.171.165:8081/" target="_blank">
+        <img src="https://img.shields.io/badge/Demo-0.9.3 SNAPSHOT-orange">
+	</a>
 	<a href="https://github.com/alan10607/Leaf" target="_blank">
         <img src="https://img.shields.io/badge/Github-alan10607/Leaf-green">
 	</a>
