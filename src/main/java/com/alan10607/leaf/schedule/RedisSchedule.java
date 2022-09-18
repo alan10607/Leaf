@@ -16,13 +16,11 @@ public class RedisSchedule extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
-            log.info("Start schedule saveCountToDB");
             viewService.saveCountToDB();
+            log.info("Schedule saveCountToDB succeeded");
         } catch (Exception e) {
             log.error("Schedule saveCountToDB fail");
             throw new JobExecutionException(e);
-        }finally {
-//            log.info("End schedule saveCountToDB");
         }
     }
 

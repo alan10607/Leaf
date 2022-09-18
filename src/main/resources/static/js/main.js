@@ -9,7 +9,7 @@ function post(url, data, afterFunc, afterError){
 			if(afterFunc != null)
 			    afterFunc(res.result);
 
-			console.log("Status:" + status + ",res:" + JSON.stringify(res));
+//			console.log("Status:" + status + ",res:" + JSON.stringify(res));
 		},
 		error: function (xhr, status) {
 			if(afterError != null)

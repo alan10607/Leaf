@@ -31,7 +31,7 @@ public class WebPageController {
         try{
             String leafName = "leaf";//暫時給個預設
             model.addAttribute("leafName", leafName);
-            model.addAttribute("picFileName", "leaf.jpg");//可以改成從DB查到
+            model.addAttribute("picFileName", "leaf.png");//可以改成從DB查到
         }catch (Exception e){
             log.error(e.getMessage());
         }
@@ -48,7 +48,7 @@ public class WebPageController {
             leafDTO.setLeafName(leafName);
             leafDTO = leafService.find(leafDTO);
             model.addAttribute("leafName", leafDTO.getLeafName());
-            model.addAttribute("picFileName", "leaf.jpg");
+            model.addAttribute("picFileName", "leaf.png");
         }catch (Exception e){
             response.setStatus(HttpStatus.NOT_FOUND.value());//查不到則回404
             return err(request, response, model);

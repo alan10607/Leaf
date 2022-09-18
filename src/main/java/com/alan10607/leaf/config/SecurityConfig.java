@@ -57,7 +57,7 @@ public class SecurityConfig {
         //http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不使用session
         http.formLogin().loginPage("/login").loginProcessingUrl("/loginProcessing").defaultSuccessUrl("/admin").failureForwardUrl("/login?error");
         http.logout().logoutUrl("/logoutProcessing").logoutSuccessUrl("/login?logout");
-        http.authorizeRequests().antMatchers("/index/**", "/css/**", "/js/**", "/pic/**", "/view/**", "/login").permitAll();//公開葉面
+        http.authorizeRequests().antMatchers("/", "/index/**", "/css/**", "/js/**", "/pic/**", "/view/**", "/login").permitAll();//公開葉面
         http.authorizeRequests().anyRequest().hasAuthority(LeafRoleType.ADMIN.name());//限制為admin權限訪問
         http.exceptionHandling().accessDeniedPage("/err");
         return http.build();

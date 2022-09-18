@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.alan10607</groupId>
 	<artifactId>leaf</artifactId>
-	<version>0.8.7-SNAPSHOT</version>
+	<version>0.9.0-SNAPSHOT</version>
 	<name>leaf</name>
 	<description>Leaf Spring Boot</description>
 	<properties>

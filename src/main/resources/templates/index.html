@@ -6,23 +6,27 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1">
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="icon.png">
-    <link rel="stylesheet" th:href="@{css/main.css}">
-    <script type="text/JavaScript" th:src="@{js/main.js}"></script>
-    <script type="text/JavaScript" th:src="@{js/index.js}"></script>
-    <script type="text/JavaScript" th:src="@{js/jquery-3.6.1.min.js}"></script>
+    <link rel="shortcut icon" th:href="@{~/pic/favicon.png}" type="image/x-icon">
+    <link rel="icon" th:href="@{~/pic/favicon.png}" type="image/x-icon">
+    <link rel="stylesheet" th:href="@{~/css/main.css}">
+    <script type="text/JavaScript" th:src="@{~/js/main.js}"></script>
+    <script type="text/JavaScript" th:src="@{~/js/index.js}"></script>
+    <script type="text/JavaScript" th:src="@{~/js/jquery-3.6.1.min.js}"></script>
 </head>
 <script th:inline="javascript">
 //啟用thymeleaf 內聯
 /*<![CDATA[*/
     const LEAF_NAME = /*[[${leafName}]]*/ "";
-    const CLICK_SOUND_URL = /*[[@{pic/click.mp3}]]*/ "";
+    const CLICK_SOUND_URL = /*[[@{~/pic/click.mp3}]]*/ "";
 /*]]>*/
 </script>
 <body onload="init();">
 <div id="bg" class="full-screan center">
     <div>
-        <img class="leaf-img" th:src="@{pic/leaf.jpg}">
+        <img class="leaf-img" th:src="@{~/pic/leaf.png}">
+    </div>
+    <div id="title-box">
+        Do you like __ ?
     </div>
     <div id="you-info-box">
         You POP <span id="you-pop">0</span> times!!
@@ -32,18 +36,24 @@
 <div id="top" class="full-screan center">
     <div>
         <div class="flex-box">
-            <div class="flex-item center" onclick="vote('bad');">
+            <div class="flex-item center">
                 <div>
-                    <div class="icon">X</div>
+                    <div id="bad-icon" class="icon" onclick="vote('bad');">
+                        <div class="icon-cover"></div>
+                        <img th:src="@{~/pic/bad.svg}"/>
+                    </div>
                     <br>
-                    <div id="bad" class="count" >0</div>
+                    <div id="bad" class="count">0</div>
                 </div>
             </div>
-            <div class="flex-item center" onclick="vote('good');">
+            <div class="flex-item center">
                 <div>
-                    <div class="icon">V</div>
+                    <div id="good-icon" class="icon" onclick="vote('good');">
+                        <div class="icon-cover"></div>
+                        <img th:src="@{~/pic/good.svg}"/>
+                    </div>
                     <br>
-                    <div id="good" class="count" >0</div>
+                    <div id="good" class="count">0</div>
                 </div>
             </div>
         </div>
