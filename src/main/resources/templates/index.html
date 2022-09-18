@@ -17,10 +17,12 @@
 //啟用thymeleaf 內聯
 /*<![CDATA[*/
     const LEAF_NAME = /*[[${leafName}]]*/ "";
-    const CLICK_SOUND_URL = /*[[@{~/pic/click.mp3}]]*/ "";
 /*]]>*/
 </script>
 <body onload="init();">
+<audio id="click-audio">
+    <source th:src="@{~/pic/click.mp3}" type="audio/mpeg">
+</audio>
 <div id="bg" class="full-screan center">
     <div>
         <img class="leaf-img" th:src="@{~/pic/leaf.png}">

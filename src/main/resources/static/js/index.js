@@ -1,21 +1,14 @@
-const UPDATE_COUNT_INTERVAL = 1000;//每秒發一次, 測試高併發
-const clickAudio = null;
+//const UPDATE_COUNT_INTERVAL = 1000;//每秒發一次, 測試高併發
 
 document.addEventListener("touchstart", function(){}, true);//手機版點擊觸發css :active動畫
 
 function init(){
     updateCount();
     getYouPop();
-    setClickAudio();
-}
-
-function setClickAudio(){
-    audio = document.createElement("audio");
-    audio.src = CLICK_SOUND_URL;
 }
 
 function playClickAudio() {
-    audio.play();
+    $("#click-audio").get(0).play();
 }
 
 //自動更新頁面
